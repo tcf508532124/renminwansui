@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Room</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      #chat-box {
+        border: 1px solid #ddd;
+        padding: 10px;
+        height: 300px;
+        overflow-y: scroll;
+      }
+      #message-form {
+        margin-top: 10px;
+      }
+    </style>
+    <script>
+      async function fetchMessages() {
+        const response = await fetch("/messages");
+        const messages = await response.json();
+        const chatBox = document.getElementById("chat-box");
+        chatBox.innerHTML = messages.map((msg) => `<p>${msg}</p>`).join("");
+      }
+
+      function sendMessage(event) {
+        event.preventDefault();
+        const messageInput = document.getElementById("message");
+        fetch("/send", {
+          method: "POST",
+          body: new URLSearchParams({ message: messageInput.value }),
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        }).then(() => {
+          messageInput.value = "";
+          fetchMessages();
+        });
+      }
+
+      setInterval(fetchMessages, 1000); // 每秒刷新消息
+    </script>
+  </head>
+  <body>
+    <h1>聊天室</h1>
+    <div id="chat-box"></div>
+    <form id="message-form" onsubmit="sendMessage(event)">
+      <input type="text" id="message" name="message" required />
+      <button type="submit">发送</button>
+    </form>
+  </body>
+</html>
